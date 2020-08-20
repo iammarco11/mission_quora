@@ -24,6 +24,6 @@ result = soup("script",{"type": "application/ld+json"})
 result = cleanhtml(str(result))
 print(result)
 
-g = open("quora.html","w")
+g = open("quora.json","w")
 g.write(str(result))
 g.close()
