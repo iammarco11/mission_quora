@@ -3,7 +3,8 @@ import re
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 import time
-
+from sentence_transformers import SentenceTransformer,util
+import numpy as np
 
 
 driver = webdriver.Chrome('/usr/bin/chromedriver')                           
@@ -49,3 +50,22 @@ for i in range(2,6):
     t = driver.find_element_by_xpath(strings).text
     possible_question.append(t)
 print(possible_question)
+model = SentenceTransformer('distilbert-base-nli-stsb-mean-tokens')
+sentence_embeddings = model.encode(possible_question)
+vector_space_length = np.zeros([len(possible_question),len(possible_question)])
+sim_q_index = -1
+max_sim=0
+for m in range(len(sentence_embeddings)):
+    main = sentence_embeddings[m]
+    for n in range(len(sentence_embeddings)):
+        similarity_index = util.pytorch_cos_sim(main,sentence_embeddings[n])
+        if m!= n and m == 0:
+            if similarity_index > max_sim:
+                max_sim = similarity_index
+                sim_q_index = n
+print(possible_question[sim_q_index])
+
+mer = '/html/body/div[2]/div/div/div/div[2]/div[4]/div/div/div[{}]/label/input'.format(sim_q_index+1)
+merge_button = driver.find_element_by_xpath(mer).click()
+final_merge = driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div[3]/div/a').click()
+print("Done :)")
